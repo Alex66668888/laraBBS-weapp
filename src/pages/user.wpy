@@ -1,0 +1,18 @@
+<style>
+</style>
+
+
+<template>
+  <view class="container">
+    我的页面
+  </view>
+</template>
+
+
+<script>
+  // import 命令用于输入其他模块提供的功能 (用于引入一个模块)
+  import wepy from 'wepy'
+
+  // export 命令用于规定模块的对外接口 （用于定义一个模块）
+  export default class User extends wepy.page {}
+</script>
