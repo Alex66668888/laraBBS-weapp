@@ -1,0 +1,166 @@
+
+<style lang="less">
+.login-wrap {
+  margin-top: 50px;
+}
+</style>
+
+<template>
+  <view class="page">
+    <view class="page__bd login-wrap">
+
+      <view class="weui-toptips weui-toptips_warn" wx:if="{{ errorMessage }}">{{ errorMessage }}</view>
+
+      <view class="weui-cells__title">Larabbs 用户登录</view>
+
+      <view class="weui-cells weui-cells_after-title">
+
+        <view class="weui-cell weui-cell_input {{ error ? 'weui-cell_warn' : ''}}">
+          <view class="weui-cell__hd">
+            <view class="weui-label">用户名</view>
+          </view>
+
+          <view class="weui-cell__bd">
+              <!-- @input —— 输入框输入事件，@ 符号是 WePY 为我们提供的事件修饰符，
+              相比原生小程序开发的 bindinput="bindUsernameInput" 要更加简便。 
+              @input="bindUsernameInput" 表示当数据框输入时，便会调用 methods 
+              中定义的 bindUsernameInput 方法； -->
+            <input class="weui-input" placeholder="手机号或邮箱" @input="bindUsernameInput" />
+          </view>
+
+          <view wx:if="{{ error }}" class="weui-cell__ft">
+            <icon type="warn" size="23" color="#E64340"></icon>
+          </view>
+        </view>
+
+        <view class="weui-cell weui-cell_input {{ error ? 'weui-cell_warn' : ''}}">
+          <view class="weui-cell__hd">
+            <view class="weui-label">密码</view>
+          </view>
+
+          <view class="weui-cell__bd">
+            <input class="weui-input" placeholder="输入密码" type="password" @input="bindPasswordInput" />
+          </view>
+
+          <view wx:if="{{ error }}" class="weui-cell__ft">
+            <icon type="warn" size="23" color="#E64340"></icon>
+          </view>
+        </view>
+
+      </view>
+
+      <view class="weui-btn-area">
+          <!-- @tap —— 手指触摸后离开事件 -->
+        <button class="weui-btn" type="primary" @tap="submit">登录</button>
+      </view>
+
+    </view>
+  </view>
+</template>
+
+<script>
+  import wepy from 'wepy'
+  // 引入 api.js 文件
+  import api from '@/utils/api'
+
+  export default class Login extends wepy.page {
+    // 页面配置
+    config = {
+      navigationBarTitleText: '登录'
+    }
+
+    // 模板中需要数据绑定的数据
+    data = {
+      // 用户名
+      username: '',
+      // 密码
+      password: '',
+      // 是否有错
+      error: false,
+      // 错误信息
+      errorMessage: ''
+    }
+
+    // 绑定的事件处理函数，所有的 事件处理函数，必须定义在 methods 对象中
+    methods = {
+      // 绑定用户名 input 变化
+      bindUsernameInput (e) {
+        this.username = e.detail.value
+      },
+      // 绑定密码 input 变化
+      bindPasswordInput (e) {
+        this.password = e.detail.value
+      },
+      // 表单提交
+      async submit() {
+        // 提交时重置错误
+        this.error = false
+        this.errorMessage = ''
+
+        // 判断用户名和密码都不能为空
+        if (!this.username || !this.password) {
+          this.errorMessage = '请填写账户名和密码'
+          return
+        }
+
+        // 获取用户名和密码
+        let params = {
+          username: this.username,
+          password: this.password
+        }
+
+        // 涉及到异步处理，例如网络请求的时候，增加 try/catch 会让你的代码更加安全
+        try {
+          let authResponse = await api.login(params)
+
+          // 请求结果为 401 说明用户名和密码错误，显示错误提示
+          if (authResponse.statusCode === 401) {
+            // 直接使用 this.error = true 就可以更新 data 中的数据
+            this.error = true
+            this.errorMessage = authResponse.data.message
+            // 在异步函数中更新数据的时，必须手动调用 this.$apply() 方法，才会触发脏数据检查流程的运行
+            // ，也就是存在异步调用的方法中，要更新 data 中某个数据时必须调用一次 this.$apply()。
+            this.$apply()
+          }
+
+          // 201 为登录正确，返回上一页
+          if (authResponse.statusCode === 201) {
+            wepy.navigateBack()
+          }
+        } catch (err) {
+          wepy.showModal({
+            title: '提示',
+            content: '服务器错误，请联系管理员'
+          })
+        }
+      }
+
+    }
+
+    // onLoad: 页面加载 —— 一个页面只会调用一次；
+    // onShow: 页面显示——每次打开页面都会调用一次；
+    // onReady: 页面初次渲染完成——一个页面只会调用一次，代表页面已经准备妥当，可以和视图层进行交互；
+    // onHide: 页面隐藏——当 navigateTo 或底部 tab 切换时调用；
+    // onUnload: 页面卸载——当 redirectTo 或 navigateBack 的时候调用。
+
+    // onShow 小程序生命周期函数：用户打开登录页面后，便会触发 onShow 方法
+    // 页面打开事件
+    async onShow() {
+      try {
+        // 打开页面自动调用一次登录
+        let authResponse = await api.login()
+
+        // 登录成功返回上一页
+        if (authResponse.statusCode === 201) {
+          // 返回之前的页面
+          wepy.navigateBack()
+        }
+      } catch (err) {
+        wepy.showModal({
+          title: '提示',
+          content: '服务器错误，请联系管理员'
+        })
+      }
+    }
+}
+</script>
