@@ -1,0 +1,52 @@
+<template>
+  <view class="page">
+      <!-- 定义好组件后，我们就可以在模板中使用了 
+      <topiclist :syncData.sync="requestData" :syncUrl.sync="requestUrl"></topiclist>。
+      调用组件的时候会动态传给组件两个数据 syncData 和 syncUrl，
+      对应着 data 中的 requestData 和 requestUrl。
+      注意我们增加了 .sync 后缀，这样在父页面中数据改变了，
+      会同步修改组件中的数据。也就是父页面中的 requestData 改变了，
+      组件中的 syncData 会同时改变。 -->
+    <view class="page__bd">
+      <topiclist :syncData.sync="requestData" :syncUrl.sync="requestUrl"></topiclist>
+    </view>
+  </view>
+</template>
+<script>
+  import wepy from 'wepy'
+  // 01、在页面中引入组件 import topicList from '@/components/topicList'；
+  import topicList from '@/components/topicList'
+
+  export default class UserIndex extends wepy.page {
+    config = {
+      navigationBarTitleText: 'Ta 发布的话题',
+      enablePullDownRefresh: true
+    }
+    data = {
+      requestData: {},
+      requestUrl: null
+    }
+    // 02、在 components 中定义要使用的组件 topiclist: topicList 注意定义的组件名只能是小写；
+    components = {
+      topiclist: topicList
+    }
+    onLoad(options) {
+      this.requestUrl = 'users/' + options.user_id + '/topics'
+      // 组件数据改变，也需要调用 this.$apply()
+      this.$apply()
+      // 调用组件 reload 方法
+      this.$invoke('topiclist', 'reload')
+    }
+    // 下拉刷新
+    async onPullDownRefresh() {
+      // 调用组件 reload 方法
+      await this.$invoke('topiclist', 'reload')
+      wepy.stopPullDownRefresh()
+    }
+    // 上拉加载更多
+    onReachBottom () {
+      // 调用组件 loadMore 方法
+      this.$invoke('topiclist', 'loadMore')
+    }
+  }
+</script>
