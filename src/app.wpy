@@ -125,5 +125,22 @@ export default class extends wepy.app {
   checkLogin () {
     return (wepy.getStorageSync('access_token') !== '')
   }
+
+  // 定义一个全局变量 refreshPages
+  globalData = {
+    refreshPages: []
+  }
+
+  // 用来检测传入的页面路由是否在 refreshPages 数组中，
+  // 如果存在，则将路由移除 refreshPages，并执行传入的回调方法
+  checkRefreshPages (route, callback) {
+    let refreshIndex = this.globalData.refreshPages.indexOf(route)
+    if (refreshIndex === -1) {
+      return
+    }
+
+    this.globalData.refreshPages.splice(refreshIndex, 1)
+    callback && callback()
+  }
 }
 </script>
