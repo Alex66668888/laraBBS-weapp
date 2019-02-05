@@ -41,7 +41,8 @@ export default class extends wepy.app {
     pages: [
       'pages/index',
       'pages/user',
-      'pages/auth/login'
+      'pages/auth/login',
+      'pages/auth/register'
     ],
     window: {
       // 下拉 loading 的样式，仅支持 dark/light

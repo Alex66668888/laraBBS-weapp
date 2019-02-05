@@ -49,6 +49,8 @@
 
       </view>
 
+        如果你还没有 Larabbs 用户可以 <navigator url="/pages/auth/register" class="weui-agree__link">注册新用户</navigator>
+
       <view class="weui-btn-area">
           <!-- @tap —— 手指触摸后离开事件 -->
         <button class="weui-btn" type="primary" @tap="submit">登录</button>
