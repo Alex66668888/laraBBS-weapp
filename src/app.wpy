@@ -199,7 +199,6 @@ export default class extends wepy.app {
     return perms
   }
 
-
   // 判断用户权限
   can (targetPerm) {
     if (!this.checkLogin()) {
@@ -216,9 +215,5 @@ export default class extends wepy.app {
 
     return false
   }
-
-
-
-
 }
 </script>
