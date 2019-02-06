@@ -41,6 +41,15 @@ module.exports = {
     }
   },
   plugins: {
+
+    replace: {
+      filter: /\.js$/,
+      config: {
+        find: /__BASE_URL__/g,
+        replace: prod ? "'http://bbs.drling.xin/api'" : "'http://larabbs.test/api'"
+      }
+    } 
+
   },
   appConfig: {
     noPromiseAPI: ['createSelectorQuery']
@@ -59,6 +68,7 @@ if (prod) {
       config: {
       }
     },
+
     imagemin: {
       filter: /\.(jpg|png|jpeg)$/,
       config: {
@@ -69,6 +79,15 @@ if (prod) {
           quality: 80
         }
       }
-    }
+    },
+
+    replace: {
+      filter: /\.js$/,
+      config: {
+        find: /__BASE_URL__/g,
+        replace: prod ? "'http://bbs.drling.xin/api'" : "'http://larabbs.test/api'"
+      }
+    }    
+
   }
 }

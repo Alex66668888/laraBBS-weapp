@@ -1,7 +1,8 @@
 import wepy from 'wepy'
 
 // 服务器接口地址 （定义了常量 host）
-const host = 'http://larabbs.test/api'
+// const host = 'http://larabbs.test/api'
+const host = __BASE_URL__
 
 // 普通请求
 const request = async (options, showLoading = true) => {
