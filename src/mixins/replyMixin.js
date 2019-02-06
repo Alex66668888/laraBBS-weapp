@@ -16,6 +16,7 @@ export default class ReplyMixin extends wepy.mixin {
     // 当前页数
     page: 1
   }
+
   // 获取话题回复
   async getReplies(reset = false) {
     try {
@@ -31,8 +32,13 @@ export default class ReplyMixin extends wepy.mixin {
       if (repliesResponse.statusCode === 200) {
         let replies = repliesResponse.data.data
 
+        // 获取当前用户
+        let user = await this.$parent.getCurrentUser()
+
         // 格式化回复创建时间
-        replies.forEach(function (reply) {
+        replies.forEach((reply) => {
+          // 控制是否可以删除
+          reply.can_delete = this.canDelete(user, reply)
           reply.created_at_diff = util.diffForHumans(reply.created_at)
         })
         // 如果reset不为true则合并 this.replies；否则直接覆盖
@@ -56,6 +62,16 @@ export default class ReplyMixin extends wepy.mixin {
       })
     }
   }
+
+  // 是否可以删除回复
+  canDelete(user, reply) {
+    if (!user) {
+      return false
+    }
+
+    return (reply.user_id === user.id)
+  }
+
   async onPullDownRefresh() {
     this.noMoreData = false
     this.page = 1
@@ -73,5 +89,51 @@ export default class ReplyMixin extends wepy.mixin {
     await this.getReplies()
     this.isLoading = false
     this.$apply()
+  }
+
+  methods = {
+  // 删除回复
+    async deleteReply(topicId, replyId) {
+    // 确认是否删除
+      let res = await wepy.showModal({
+        title: '确认删除',
+        content: '您确认删除该回复吗',
+        confirmText: '删除',
+        cancelText: '取消'
+      })
+
+    // 点击取消后返回
+      if (!res.confirm) {
+        return
+      }
+      try {
+      // 调用接口删除回复
+        let deleteResponse = await api.authRequest({
+          url: 'topics/' + topicId + '/replies/' + replyId,
+          method: 'DELETE'
+        })
+
+      // 删除成功
+        if (deleteResponse.statusCode === 204) {
+          wepy.showToast({
+            title: '删除成功',
+            icon: 'success',
+            duration: 2000
+          })
+
+        // 可以直接通过 filter 方法把当前的回复从 replies 数据中移除，这样页面中对应的回复也被移除。
+          this.replies = this.replies.filter((reply) => reply.id !== replyId)
+          this.$apply()
+        }
+
+        return deleteResponse
+      } catch (err) {
+        console.log(err)
+        wepy.showModal({
+          title: '提示',
+          content: '服务器错误，请联系管理员'
+        })
+      }
+    }
   }
 }

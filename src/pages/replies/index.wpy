@@ -15,6 +15,11 @@
   right: 30px;
 }
 
+.reply-delete {
+  width: 20px;
+  height: 20px;
+}
+
 </style>
 
 <template>
@@ -22,6 +27,7 @@
     <view class="page__bd">
       <view class="weui-panel weui-panel_access">
         <view class="weui-panel__bd">
+
           <repeat for="{{ replies }}" wx:key="id" index="index" item="reply">
             <view class="weui-media-box weui-media-box_appmsg" hover-class="weui-cell_active">
               <navigator class="weui-media-box__hd weui-media-box__hd_in-appmsg" url="/pages/users/show?id={{ reply.user_id }}">
@@ -34,8 +40,12 @@
                   <view class="weui-media-box__info__meta">{{ reply.created_at_diff }}</view>
                 </view>
               </view>
+
+              <image wx:if="{{ reply.can_delete }}" class="reply-delete" src="/images/trash.png" @tap="deleteReply({{ reply.topic_id }}, {{ reply.id }})"/>
+
             </view>
           </repeat>
+
           <view class="weui-loadmore weui-loadmore_line" wx:if="{{ noMoreData }}">
             <view class="weui-loadmore__tips weui-loadmore__tips_in-line">没有更多数据</view>
           </view>
